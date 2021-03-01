@@ -14,3 +14,33 @@ a {
 * {
   box-sizing: border-box;
 }
+
+/* reset */
+*, *::after, *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+.container {
+  display: grid;
+  --columns: 4;
+  grid-template-columns: repeat(var(--columns), auto);
+}
+
+.square {
+  border-style: solid solid none none;
+  min-height: 100px;
+  max-height: 100px;
+  height: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
+}
+
+.square-left {
+  border-left-style: solid;
+} 
+.square-bottom { 
+  border-bottom-style: solid;
+}

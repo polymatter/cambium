@@ -1,57 +1,64 @@
 import Head from 'next/head';
+import Plateau from '../components/Plateau';
+import RobotCommunication from '../components/RobotCommunication';
 import styles from '../styles/Home.module.css';
+import { useState } from 'react';
 
 export default function Home() {
+  const clockwiseDirections = ['N', 'E', 'S', 'W'];
+  const antiClockwiseDirections = [...clockwiseDirections].reverse();
+  const directionMovement = [{ direction: 'N', row: -1, column: 0 }, { direction: 'E', row: 0, column: 1 }, { direction: 'S', row: 1, column: 0 }, { direction: 'W', row: 0, column: -1 }];
+
+  const commandsReceived = () => {
+    const commands = document.querySelector('#robotCommunication').value.trim();
+    const initial = commands.slice(0, commands.indexOf('|') + 1).match(/[\d]+[\s|,.]/g)
+    console.log(initial)
+    let row = Number(initial[0].trim().replace('|', '').replace(',', ''));
+    let column = Number(initial[1].trim().replace('|', '').replace(',', ''));
+    let direction = commands.slice(0, commands.indexOf('|') + 1).match(/[a-zA-Z]/)[0].trim().replace('|', '').replace(',', '');
+    console.log(`start at ${direction}`);
+    const commandBody = commands.slice(commands.indexOf('|') + 1).trim().replace('|', '').replace(',', '');
+    commandBody.split('').forEach(command => {
+      if (command == 'R') {
+        direction = clockwiseDirections[(clockwiseDirections.indexOf(direction) + 1) % clockwiseDirections.length];
+      } else if (command == 'L') {
+        direction = antiClockwiseDirections[(antiClockwiseDirections.indexOf(direction) + 1) % antiClockwiseDirections.length];
+      } else if (command == 'M') {
+        const move = directionMovement.find(i => i.direction == direction);
+        row = Number(row) + Number(move.row);
+        column = Number(column) + Number(move.column);
+      }
+
+    });
+
+    setRobotLocation({ row, column, direction });
+  }
+
+  const [robotLocation, setRobotLocation] = useState({ row: 0, column: 0, direction: 'N' })
+
+  const gridsize = { rows: 10, columns: 10 }
+
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>Mars Rover Project</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Mars Rover Project
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing <p>Yo my dudes!</p>
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+        Robot is at ({ robotLocation.row }, { robotLocation.column }) facing { robotLocation.direction }
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+        <Plateau rows={gridsize.rows} columns={gridsize.columns} robotLocation={robotLocation}></Plateau>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a href="https://github.com/vercel/next.js/tree/master/examples" className={styles.card}>
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}>
-            <h3>Deploy &rarr;</h3>
-            <p>Instantly deploy your Next.js site to a public URL with Vercel.</p>
-          </a>
-        </div>
+        <RobotCommunication commandsReceived={commandsReceived} width={gridsize.columns * 100}></RobotCommunication>
       </main>
 
       <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer">
-          Powered by
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
+        Created by Jeffrey Lake
       </footer>
     </div>
   );
